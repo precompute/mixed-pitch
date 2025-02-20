@@ -5,7 +5,7 @@
 ;; Author: J. Alexander Branham <branham@utexas.edu>
 ;; Maintainer: J. Alexander Branham <branham@utexas.edu>
 ;; URL: https://gitlab.com/jabranham/mixed-pitch
-;; Version: 1.1.2
+;; Version: 1.1.3
 ;; Package-Requires: ((emacs "24.3"))
 
 ;; This file is not part of GNU Emacs.
@@ -134,6 +134,14 @@ When nil, only set the family."
   :package-version '(mixed-pitch . "1.1.0")
   :group 'mixed-pitch)
 
+(defcustom mixed-pitch-set-all-attrs nil
+  "If non-nil, set all attributes of the face.
+
+When nil, only set the family."
+  :type 'boolean
+  :package-version '(mixed-pitch . "1.1.3")
+  :group 'mixed-pitch)
+
 (defcustom mixed-pitch-face 'variable-pitch
   "Variable pitch face to use."
   :type 'face
@@ -179,10 +187,15 @@ inherited from `variable-pitch' and `default'."
             (setq mixed-pitch-cursor-type cursor-type))
           ;; remap default face to variable pitch
           (setq mixed-pitch-variable-cookie
-                (if mixed-pitch-set-height
-                    (face-remap-add-relative
-                     'default :family var-pitch :height var-height :weight var-weight)
-                  (face-remap-add-relative 'default :family var-pitch :weight var-weight)))
+                (cond
+                 (mixed-pitch-set-all-attrs
+                  (face-remap-add-relative
+                   'default (face-attr-construct mixed-pitch-face)))
+                 (mixed-pitch-set-height
+                  (face-remap-add-relative
+                   'default :family var-pitch :height var-height :weight var-weight))
+                 (t
+                  (face-remap-add-relative 'default :family var-pitch :weight var-weight))))
           (setq mixed-pitch-fixed-cookie nil)
           ;; keep fonts in `mixed-pitch-fixed-pitch-faces' as fixed-pitch.
           (dolist (face mixed-pitch-fixed-pitch-faces)
